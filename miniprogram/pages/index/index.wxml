@@ -1,0 +1,55 @@
+<!--pages/index/index.wxml-->
+<view class="container">
+  <!-- 头部横幅 -->
+  <view class="header-banner">
+    <text class="banner-title">道观服务预约</text>
+    <text class="banner-subtitle">虔诚祈福，心愿成真</text>
+  </view>
+
+  <!-- 分类标签 -->
+  <scroll-view class="category-scroll" scroll-x="true" enable-flex="true">
+    <view class="category-tabs">
+      <view
+        class="category-tab {{currentCategory === item.id ? 'active' : ''}}"
+        wx:for="{{categories}}"
+        wx:key="id"
+        bindtap="switchCategory"
+        data-id="{{item.id}}"
+      >
+        <text class="category-icon">{{item.icon}}</text>
+        <text class="category-name">{{item.name}}</text>
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- 服务列表 -->
+  <view class="services-list">
+    <block wx:if="{{!loading && services.length > 0}}">
+      <view class="service-card" wx:for="{{services}}" wx:key="id" bindtap="goToDetail" data-id="{{item.id}}">
+        <image class="service-image" src="{{item.image_url || '/images/default-service.png'}}" mode="aspectFill"></image>
+        <view class="service-info">
+          <view class="service-header">
+            <text class="service-name">{{item.name}}</text>
+            <text class="service-category">{{item.category_name}}</text>
+          </view>
+          <text class="service-desc">{{item.short_description}}</text>
+          <view class="service-price">
+            <text class="price-label">基础价格：</text>
+            <text class="price-value">¥{{item.base_price}}</text>
+            <text class="price-per-person">（每增加一人 +¥{{item.price_per_person}}）</text>
+          </view>
+        </view>
+      </view>
+    </block>
+
+    <!-- 加载中 -->
+    <view wx:if="{{loading}}" class="loading-state">
+      <text>加载中...</text>
+    </view>
+
+    <!-- 空状态 -->
+    <view wx:if="{{!loading && services.length === 0}}" class="empty-state">
+      <text>该分类暂无服务</text>
+    </view>
+  </view>
+</view>

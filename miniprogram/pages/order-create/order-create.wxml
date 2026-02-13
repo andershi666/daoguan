@@ -1,0 +1,130 @@
+<!--pages/order-create/order-create.wxml-->
+<view class="container">
+  <!-- 服务信息 -->
+  <view class="card service-info" wx:if="{{service}}">
+    <view class="section-title">服务信息</view>
+    <text class="service-name">{{service.name}}</text>
+    <text class="service-desc">{{service.short_description}}</text>
+  </view>
+
+  <!-- 人员信息 -->
+  <view class="card persons-section">
+    <view class="section-title">
+      <text>人员信息</text>
+      <text class="add-person-btn" bindtap="addPerson">+ 添加人员</text>
+    </view>
+
+    <block wx:for="{{persons}}" wx:key="id" wx:for-index="index">
+      <view class="person-card">
+        <view class="person-header">
+          <text class="person-number">第{{index + 1}}位</text>
+          <text class="delete-btn" bindtap="deletePerson" data-index="{{index}}" wx:if="{{persons.length > 1}}">删除</text>
+        </view>
+
+        <!-- 姓名 -->
+        <view class="input-item">
+          <text class="input-label">姓名 *</text>
+          <input
+            class="input-field"
+            placeholder="请输入姓名"
+            value="{{item.name}}"
+            bindinput="onNameInput"
+            data-index="{{index}}"
+            maxlength="20"
+          />
+        </view>
+
+        <!-- 性别 -->
+        <view class="input-item">
+          <text class="input-label">性别 *</text>
+          <radio-group bindchange="onGenderChange" data-index="{{index}}">
+            <label class="radio-item">
+              <radio value="male" checked="{{item.gender === 'male'}}" color="#8B4513"/>
+              <text>男</text>
+            </label>
+            <label class="radio-item">
+              <radio value="female" checked="{{item.gender === 'female'}}" color="#8B4513"/>
+              <text>女</text>
+            </label>
+          </radio-group>
+        </view>
+
+        <!-- 出生日期 -->
+        <view class="input-item">
+          <text class="input-label">出生日期 *</text>
+          <picker
+            mode="date"
+            value="{{item.birth_date}}"
+            bindchange="onBirthDateChange"
+            data-index="{{index}}"
+            end="{{today}}"
+          >
+            <view class="picker-display">
+              {{item.birth_date || '请选择出生日期'}}
+            </view>
+          </picker>
+        </view>
+
+        <!-- 出生时辰 -->
+        <view class="input-item">
+          <text class="input-label">出生时辰 *</text>
+          <view class="picker-display" bindtap="showShichenPickerHandler" data-index="{{index}}">
+            {{item.shichen_name}}
+          </view>
+        </view>
+
+        <!-- 居住地址 -->
+        <view class="input-item">
+          <text class="input-label">居住地址</text>
+          <input
+            class="input-field"
+            placeholder="请输入居住地址"
+            value="{{item.address}}"
+            bindinput="onAddressInput"
+            data-index="{{index}}"
+            maxlength="100"
+          />
+        </view>
+      </view>
+    </block>
+  </view>
+
+  <!-- 时辰选择器 -->
+  <picker-view
+    wx:if="{{showShichenPicker}}"
+    class="shichen-picker"
+    bindchange="onShichenChange"
+  >
+    <picker-view-column>
+      <view wx:for="{{shichenList}}" wx:key="value" class="picker-item">
+        {{item.name}}
+      </view>
+    </picker-view-column>
+  </picker-view>
+
+  <!-- 其他信息 -->
+  <view class="card">
+    <view class="section-title">其他信息</view>
+
+    <!-- 备注说明 -->
+    <view class="input-item">
+      <text class="input-label">备注说明</text>
+      <textarea
+        class="textarea-field"
+        placeholder="请输入备注说明（如特殊需求等）"
+        value="{{remark}}"
+        bindinput="onRemarkInput"
+        maxlength="500"
+      ></textarea>
+    </view>
+  </view>
+
+  <!-- 底部订单栏 -->
+  <view class="order-bar">
+    <view class="price-info">
+      <text class="total-label">合计：</text>
+      <text class="total-amount">¥{{totalAmount}}</text>
+    </view>
+    <button class="submit-btn" bindtap="submitOrder">提交订单</button>
+  </view>
+</view>

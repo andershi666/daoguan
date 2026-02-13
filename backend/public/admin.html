@@ -1,0 +1,1846 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>道观服务管理后台</title>
+  <style>
+    :root {
+      --primary-color: #8B4513;
+      --primary-light: #CD853F;
+      --primary-dark: #6B3410;
+      --success-color: #48bb78;
+      --danger-color: #f56565;
+      --warning-color: #ed8936;
+      --info-color: #4299e1;
+      --bg-primary: #faf5f0;
+      --bg-secondary: #f8f5f0;
+      --text-primary: #2d3748;
+      --text-secondary: #718096;
+      --border-color: #e2d9d1;
+      --shadow-sm: 0 2px 8px rgba(139, 69, 19, 0.08);
+      --shadow-md: 0 4px 16px rgba(139, 69, 19, 0.12);
+      --shadow-lg: 0 8px 24px rgba(139, 69, 19, 0.16);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: linear-gradient(135deg, var(--bg-primary) 0%, #ede4d9 100%);
+      min-height: 100vh;
+      color: var(--text-primary);
+      line-height: 1.6;
+    }
+
+    /* 侧边栏 + 主内容布局 */
+    .layout {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* 侧边导航 */
+    .sidebar {
+      width: 260px;
+      background: linear-gradient(180deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+      color: white;
+      padding: 0;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+      overflow-x: hidden;
+      box-shadow: 4px 0 16px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+      transition: width 0.3s ease;
+    }
+
+    .sidebar.collapsed {
+      width: 70px;
+    }
+
+    .sidebar-header {
+      padding: 32px 24px;
+      text-align: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(0, 0, 0, 0.1);
+      position: relative;
+      transition: padding 0.3s ease;
+    }
+
+    .sidebar.collapsed .sidebar-header {
+      padding: 20px 10px;
+    }
+
+    .sidebar-header h1 {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      letter-spacing: 1px;
+      transition: opacity 0.3s ease;
+    }
+
+    .sidebar.collapsed .sidebar-header h1 {
+      font-size: 28px;
+      margin-bottom: 0;
+    }
+
+    .sidebar-header p {
+      font-size: 12px;
+      opacity: 0.8;
+      letter-spacing: 0.5px;
+      transition: opacity 0.3s ease;
+    }
+
+    .sidebar.collapsed .sidebar-header p {
+      display: none;
+    }
+
+    /* 折叠按钮 */
+    .sidebar-toggle {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: 32px;
+      height: 32px;
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      border-radius: 6px;
+      color: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      transition: all 0.3s ease;
+    }
+
+    .sidebar-toggle:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .sidebar.collapsed .sidebar-toggle {
+      right: 50%;
+      transform: translateX(50%);
+    }
+
+    .sidebar-nav {
+      padding: 24px 0;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      padding: 16px 24px;
+      color: rgba(255, 255, 255, 0.85);
+      cursor: pointer;
+      transition: all 0.3s;
+      border-left: 4px solid transparent;
+      font-size: 15px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .sidebar.collapsed .nav-item {
+      padding: 16px 0;
+      justify-content: center;
+      border-left: none;
+    }
+
+    .nav-item:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+    }
+
+    .nav-item.active {
+      background: rgba(255, 255, 255, 0.15);
+      border-left-color: #FFD700;
+      color: white;
+    }
+
+    .sidebar.collapsed .nav-item.active {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .nav-item-icon {
+      font-size: 20px;
+      margin-right: 12px;
+      width: 24px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .sidebar.collapsed .nav-item-icon {
+      margin-right: 0;
+    }
+
+    .nav-item-text {
+      transition: opacity 0.3s ease;
+    }
+
+    .sidebar.collapsed .nav-item-text {
+      display: none;
+    }
+
+    /* 主内容区 */
+    .main-content {
+      flex: 1;
+      margin-left: 260px;
+      padding: 0;
+      background: var(--bg-primary);
+      transition: margin-left 0.3s ease;
+    }
+
+    .sidebar.collapsed ~ .main-content {
+      margin-left: 70px;
+    }
+
+    /* 顶部栏 */
+    .topbar {
+      background: white;
+      padding: 20px 32px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .topbar-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--primary-color);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .topbar-actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    /* 内容容器 */
+    .content-wrapper {
+      padding: 32px;
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+
+    .tab-content {
+      display: none;
+      animation: fadeIn 0.4s ease-in-out;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* 统计卡片 */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+
+    .stat-card {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.3s;
+      border: 2px solid var(--border-color);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary-color), var(--primary-light));
+    }
+
+    .stat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .stat-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .stat-card-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+      color: white;
+    }
+
+    .stat-card-label {
+      font-size: 14px;
+      color: var(--text-secondary);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .stat-card-value {
+      font-size: 36px;
+      font-weight: 700;
+      color: var(--primary-color);
+      line-height: 1;
+    }
+
+    /* 卡片容器 */
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: var(--shadow-sm);
+      border: 2px solid var(--border-color);
+      margin-bottom: 24px;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    .card-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--primary-color);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    /* 按钮样式 */
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      letter-spacing: 0.3px;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+      color: white;
+    }
+
+    .btn-success {
+      background: var(--success-color);
+      color: white;
+    }
+
+    .btn-danger {
+      background: var(--danger-color);
+      color: white;
+    }
+
+    .btn-secondary {
+      background: var(--text-secondary);
+      color: white;
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 2px solid var(--primary-color);
+      color: var(--primary-color);
+    }
+
+    .btn-outline:hover {
+      background: var(--primary-color);
+      color: white;
+    }
+
+    .btn-sm {
+      padding: 6px 14px;
+      font-size: 13px;
+    }
+
+    /* 表格样式 */
+    .table-container {
+      overflow-x: auto;
+      border-radius: 12px;
+      border: 2px solid var(--border-color);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+    }
+
+    thead {
+      background: linear-gradient(to right, #f8f5f0, #faf5f0);
+    }
+
+    th {
+      padding: 16px 20px;
+      text-align: left;
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--primary-color);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      border-bottom: 3px solid var(--primary-color);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 14px;
+      color: var(--text-primary);
+    }
+
+    tbody tr {
+      transition: all 0.2s;
+    }
+
+    tbody tr:hover {
+      background: var(--bg-secondary);
+      transform: scale(1.005);
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* 状态徽章 */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      white-space: nowrap;
+    }
+
+    .badge-pending {
+      background: #fef5e7;
+      color: #d68910;
+      border: 1px solid #f9e79f;
+    }
+
+    .badge-paid {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .badge-success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .badge-completed {
+      background: #cce5ff;
+      color: #004085;
+      border: 1px solid #b8daff;
+    }
+
+    .badge-cancelled {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    .badge-active {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .badge-inactive {
+      background: #e2e8f0;
+      color: #4a5568;
+      border: 1px solid #cbd5e0;
+    }
+
+    /* 输入框样式 */
+    .input {
+      padding: 10px 16px;
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 14px;
+      transition: all 0.3s;
+      background: white;
+      color: var(--text-primary);
+    }
+
+    .input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(139, 69, 19, 0.1);
+    }
+
+    .search-box {
+      flex: 1;
+      max-width: 300px;
+    }
+
+    select.input {
+      cursor: pointer;
+    }
+
+    /* 模态框 */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 2000;
+      animation: fadeIn 0.3s;
+    }
+
+    .modal.active {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 20px;
+      max-width: 650px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      animation: slideUp 0.4s;
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(50px) scale(0.9);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+      }
+    }
+
+    .modal-header {
+      padding: 28px 32px;
+      border-bottom: 2px solid var(--border-color);
+      background: linear-gradient(to right, var(--bg-primary), white);
+    }
+
+    .modal-header h2 {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--primary-color);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .modal-body {
+      padding: 32px;
+    }
+
+    .modal-footer {
+      padding: 20px 32px;
+      border-top: 2px solid var(--border-color);
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      background: var(--bg-primary);
+    }
+
+    /* 表单组 */
+    .form-group {
+      margin-bottom: 24px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--text-primary);
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 14px;
+      transition: all 0.3s;
+      font-family: inherit;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(139, 69, 19, 0.1);
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    /* 空状态 */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-secondary);
+    }
+
+    .empty-state-icon {
+      font-size: 64px;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+
+    .empty-state-text {
+      font-size: 16px;
+      font-weight: 500;
+    }
+
+    /* 加载状态 */
+    .loading {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-secondary);
+    }
+
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid var(--border-color);
+      border-top-color: var(--primary-color);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* 图片 */
+    .img-thumbnail {
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 2px solid var(--border-color);
+    }
+
+    .img-placeholder {
+      width: 60px;
+      height: 60px;
+      background: var(--bg-secondary);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      color: var(--text-secondary);
+      border: 2px solid var(--border-color);
+    }
+
+    /* 响应式 */
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s;
+      }
+
+      .sidebar.active {
+        transform: translateX(0);
+      }
+
+      .main-content {
+        margin-left: 0;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .topbar-title {
+        font-size: 18px;
+      }
+
+      .content-wrapper {
+        padding: 16px;
+      }
+    }
+
+    /* 工具提示 */
+    .tooltip {
+      position: relative;
+      cursor: help;
+    }
+
+    .tooltip:hover::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 6px 12px;
+      background: rgba(0, 0, 0, 0.9);
+      color: white;
+      font-size: 12px;
+      border-radius: 6px;
+      white-space: nowrap;
+      z-index: 1000;
+      margin-bottom: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <!-- 侧边导航 -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <button class="sidebar-toggle" onclick="toggleSidebar()" title="折叠/展开菜单">
+          <span id="toggleIcon">◀</span>
+        </button>
+        <h1>🏮 道观管理</h1>
+        <p>预约服务管理系统</p>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-item active" onclick="switchTab('stats')">
+          <span class="nav-item-icon">📊</span>
+          <span class="nav-item-text">数据概览</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('orders')">
+          <span class="nav-item-icon">📋</span>
+          <span class="nav-item-text">订单管理</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('persons')">
+          <span class="nav-item-icon">👥</span>
+          <span class="nav-item-text">报名人员</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('services')">
+          <span class="nav-item-icon">⚙️</span>
+          <span class="nav-item-text">服务管理</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('categories')">
+          <span class="nav-item-icon">📂</span>
+          <span class="nav-item-text">分类管理</span>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- 主内容区 -->
+    <main class="main-content">
+      <!-- 顶部栏 -->
+      <div class="topbar">
+        <div class="topbar-title">
+          <span id="currentTabTitle">数据概览</span>
+        </div>
+        <div class="topbar-actions">
+          <button class="btn btn-outline btn-sm" onclick="location.reload()">
+            🔄 刷新数据
+          </button>
+        </div>
+      </div>
+
+      <!-- 内容区 -->
+      <div class="content-wrapper">
+        <!-- 数据统计 -->
+        <div id="stats" class="tab-content active">
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-card-header">
+                <div class="stat-card-icon">📦</div>
+              </div>
+              <div class="stat-card-label">总订单数</div>
+              <div class="stat-card-value" id="totalOrders">0</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card-header">
+                <div class="stat-card-icon">✅</div>
+              </div>
+              <div class="stat-card-label">已完成订单</div>
+              <div class="stat-card-value" id="completedOrders">0</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card-header">
+                <div class="stat-card-icon">💰</div>
+              </div>
+              <div class="stat-card-label">总收入</div>
+              <div class="stat-card-value" id="totalRevenue">¥0</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card-header">
+                <div class="stat-card-icon">🛍️</div>
+              </div>
+              <div class="stat-card-label">服务总数</div>
+              <div class="stat-card-value" id="totalServices">0</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">📈 最近订单</h3>
+            </div>
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>订单号</th>
+                    <th>服务名称</th>
+                    <th>金额</th>
+                    <th>状态</th>
+                    <th>创建时间</th>
+                  </tr>
+                </thead>
+                <tbody id="recentOrdersBody">
+                  <tr>
+                    <td colspan="5" class="loading">
+                      <div class="loading-spinner"></div>
+                      <div>加载中...</div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- 订单管理 -->
+        <div id="orders" class="tab-content">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">📋 订单列表</h3>
+              <div class="card-actions">
+                <input type="text" class="input search-box" id="orderSearch" placeholder="🔍 搜索订单号、用户ID...">
+                <select class="input" id="orderStatusFilter" onchange="filterOrders()">
+                  <option value="">全部状态</option>
+                  <option value="pending">待支付</option>
+                  <option value="paid">已支付</option>
+                  <option value="processing">处理中</option>
+                  <option value="completed">已完成</option>
+                  <option value="cancelled">已取消</option>
+                </select>
+                <button class="btn btn-primary btn-sm" onclick="loadOrders()">🔄 刷新</button>
+                <button class="btn btn-success btn-sm" onclick="exportOrders()">📥 导出</button>
+              </div>
+            </div>
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>订单号</th>
+                    <th>服务名称</th>
+                    <th>金额</th>
+                    <th>人数</th>
+                    <th>订单状态</th>
+                    <th>创建时间</th>
+                  </tr>
+                </thead>
+                <tbody id="ordersBody">
+                  <tr>
+                    <td colspan="6" class="loading">
+                      <div class="loading-spinner"></div>
+                      <div>加载中...</div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- 报名人员 -->
+        <div id="persons" class="tab-content">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">👥 报名人员列表 (仅显示已完成订单)</h3>
+              <div class="card-actions">
+                <input type="text" class="input search-box" id="personSearch" placeholder="🔍 搜索姓名、订单号...">
+                <select class="input" id="genderFilter" onchange="filterPersons()">
+                  <option value="">全部性别</option>
+                  <option value="male">男</option>
+                  <option value="female">女</option>
+                </select>
+                <select class="input" id="serviceFilter" onchange="filterPersons()">
+                  <option value="">全部服务</option>
+                </select>
+                <button class="btn btn-primary btn-sm" onclick="loadPersons()">🔄 刷新</button>
+                <button class="btn btn-success btn-sm" onclick="exportPersons()">📥 导出</button>
+              </div>
+            </div>
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>姓名</th>
+                    <th>性别</th>
+                    <th>出生日期</th>
+                    <th>时辰</th>
+                    <th>八字</th>
+                    <th>生肖</th>
+                    <th>居住地址</th>
+                    <th>服务</th>
+                    <th>订单号</th>
+                    <th>订单备注</th>
+                    <th>报名时间</th>
+                  </tr>
+                </thead>
+                <tbody id="personsBody">
+                  <tr>
+                    <td colspan="11" class="loading">
+                      <div class="loading-spinner"></div>
+                      <div>加载中...</div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- 服务管理 -->
+        <div id="services" class="tab-content">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">⚙️ 服务列表</h3>
+              <div class="card-actions">
+                <button class="btn btn-primary" onclick="showServiceModal()">➕ 新建服务</button>
+                <button class="btn btn-outline btn-sm" onclick="loadServices()">🔄 刷新</button>
+              </div>
+            </div>
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>图片</th>
+                    <th>服务名称</th>
+                    <th>分类</th>
+                    <th>基础价格</th>
+                    <th>每人加价</th>
+                    <th>状态</th>
+                    <th>排序</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody id="servicesBody">
+                  <tr>
+                    <td colspan="8" class="loading">
+                      <div class="loading-spinner"></div>
+                      <div>加载中...</div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- 分类管理 -->
+        <div id="categories" class="tab-content">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">📂 分类列表</h3>
+              <div class="card-actions">
+                <button class="btn btn-primary" onclick="showCategoryModal()">➕ 新建分类</button>
+                <button class="btn btn-outline btn-sm" onclick="loadAllCategories()">🔄 刷新</button>
+              </div>
+            </div>
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>图标</th>
+                    <th>分类名称</th>
+                    <th>排序</th>
+                    <th>状态</th>
+                    <th>创建时间</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody id="categoriesBody">
+                  <tr>
+                    <td colspan="6" class="loading">
+                      <div class="loading-spinner"></div>
+                      <div>加载中...</div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- 服务编辑模态框 -->
+  <div id="serviceModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="serviceModalTitle">➕ 新建服务</h2>
+      </div>
+      <form id="serviceForm" onsubmit="saveService(event)">
+        <div class="modal-body">
+          <div class="form-group">
+            <label>服务名称 *</label>
+            <input type="text" name="name" required placeholder="请输入服务名称">
+          </div>
+          <div class="form-group">
+            <label>短描述</label>
+            <input type="text" name="short_description" placeholder="简短描述服务特点">
+          </div>
+          <div class="form-group">
+            <label>详细描述</label>
+            <textarea name="description" placeholder="详细介绍服务内容"></textarea>
+          </div>
+          <div class="form-group">
+            <label>分类 *</label>
+            <select name="category_id" id="categorySelect" required>
+              <option value="">选择分类</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>基础价格 (元) *</label>
+            <input type="number" name="base_price" step="0.01" required placeholder="0.00">
+          </div>
+          <div class="form-group">
+            <label>每人加价 (元) *</label>
+            <input type="number" name="price_per_person" step="0.01" required placeholder="0.00">
+          </div>
+          <div class="form-group">
+            <label>图片URL</label>
+            <input type="text" name="image_url" placeholder="https://...">
+          </div>
+          <div class="form-group">
+            <label>排序值</label>
+            <input type="number" name="sort_order" value="0">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('serviceModal')">取消</button>
+          <button type="submit" class="btn btn-primary">💾 保存</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 分类编辑模态框 -->
+  <div id="categoryModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="categoryModalTitle">➕ 新建分类</h2>
+      </div>
+      <form id="categoryForm" onsubmit="saveCategory(event)">
+        <input type="hidden" name="id">
+        <div class="modal-body">
+          <div class="form-group">
+            <label>分类名称 *</label>
+            <input type="text" name="name" required placeholder="请输入分类名称">
+          </div>
+          <div class="form-group">
+            <label>图标 (emoji)</label>
+            <input type="text" name="icon" placeholder="例如：🙏 ✨ 🎁">
+          </div>
+          <div class="form-group">
+            <label>排序值</label>
+            <input type="number" name="sort_order" value="0">
+          </div>
+          <div class="form-group">
+            <label>状态</label>
+            <select name="status">
+              <option value="active">启用</option>
+              <option value="inactive">禁用</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('categoryModal')">取消</button>
+          <button type="submit" class="btn btn-primary">💾 保存</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = 'http://localhost:3000/api';
+    let allOrders = [];
+    let allServices = [];
+    let allPersons = [];
+    let categories = [];
+
+    // 侧边栏折叠/展开
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const toggleIcon = document.getElementById('toggleIcon');
+      const isCollapsed = sidebar.classList.toggle('collapsed');
+
+      // 更新图标
+      toggleIcon.textContent = isCollapsed ? '▶' : '◀';
+
+      // 保存状态到localStorage
+      localStorage.setItem('sidebarCollapsed', isCollapsed);
+    }
+
+    // 页面加载时恢复侧边栏状态
+    function restoreSidebarState() {
+      const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+      if (isCollapsed) {
+        document.getElementById('sidebar').classList.add('collapsed');
+        document.getElementById('toggleIcon').textContent = '▶';
+      }
+    }
+
+    // 日期格式化函数
+    function formatDateTime(dateStr) {
+      if (!dateStr) return '';
+      const date = new Date(dateStr);
+      if (isNaN(date.getTime())) return dateStr;
+
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      const seconds = String(date.getSeconds()).padStart(2, '0');
+
+      return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return '';
+      const date = new Date(dateStr);
+      if (isNaN(date.getTime())) {
+        // 如果已经是 YYYY-MM-DD 格式,直接返回
+        if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+          return dateStr;
+        }
+        return dateStr;
+      }
+
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+
+      return `${year}-${month}-${day}`;
+    }
+
+    // 标签页标题映射
+    const tabTitles = {
+      'stats': '数据概览',
+      'orders': '订单管理',
+      'persons': '报名人员',
+      'services': '服务管理',
+      'categories': '分类管理'
+    };
+
+    // 切换标签页
+    function switchTab(tabName) {
+      // 更新导航状态
+      document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.remove('active');
+      });
+      event.currentTarget.classList.add('active');
+
+      // 更新内容显示
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+      });
+      document.getElementById(tabName).classList.add('active');
+
+      // 更新顶部标题
+      document.getElementById('currentTabTitle').textContent = tabTitles[tabName];
+
+      // 加载对应数据
+      if (tabName === 'stats') loadStats();
+      if (tabName === 'orders') loadOrders();
+      if (tabName === 'persons') loadPersons();
+      if (tabName === 'services') loadServices();
+      if (tabName === 'categories') loadAllCategories();
+    }
+
+    // 加载订单列表
+    async function loadOrders() {
+      try {
+        const response = await fetch(`${API_BASE}/admin/orders`);
+        const result = await response.json();
+
+        if (result.success) {
+          allOrders = result.data;
+          renderOrders(allOrders);
+        } else {
+          throw new Error(result.message);
+        }
+      } catch (error) {
+        console.error('加载订单失败:', error);
+        document.getElementById('ordersBody').innerHTML = `
+          <tr>
+            <td colspan="7" class="empty-state">
+              <div class="empty-state-icon">⚠️</div>
+              <div class="empty-state-text">加载失败: ${error.message}</div>
+            </td>
+          </tr>`;
+      }
+    }
+
+    // 渲染订单列表
+    function renderOrders(orders) {
+      const tbody = document.getElementById('ordersBody');
+
+      if (orders.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" class="empty-state">
+              <div class="empty-state-icon">📦</div>
+              <div class="empty-state-text">暂无订单数据</div>
+            </td>
+          </tr>`;
+        return;
+      }
+
+      const statusMap = {
+        'pending': { text: '待支付', class: 'badge-pending' },
+        'paid': { text: '已支付', class: 'badge-paid' },
+        'processing': { text: '处理中', class: 'badge-pending' },
+        'completed': { text: '已完成', class: 'badge-completed' },
+        'cancelled': { text: '已取消', class: 'badge-cancelled' }
+      };
+
+      tbody.innerHTML = orders.map(order => `
+        <tr>
+          <td style="font-family: monospace; font-size: 12px;">${order.order_no}</td>
+          <td><strong>${order.service_name}</strong></td>
+          <td><strong style="color: var(--primary-color);">¥${parseFloat(order.total_amount).toFixed(2)}</strong></td>
+          <td>${order.person_count}人</td>
+          <td><span class="badge ${statusMap[order.status]?.class || ''}">${statusMap[order.status]?.text || order.status}</span></td>
+          <td style="font-size: 13px;">${formatDateTime(order.created_at)}</td>
+        </tr>
+      `).join('');
+    }
+
+    // 筛选订单
+    function filterOrders() {
+      const status = document.getElementById('orderStatusFilter').value;
+      const searchTerm = document.getElementById('orderSearch').value.toLowerCase();
+
+      let filtered = allOrders;
+
+      if (status) {
+        filtered = filtered.filter(o => o.status === status);
+      }
+
+      if (searchTerm) {
+        filtered = filtered.filter(o =>
+          o.order_no.toLowerCase().includes(searchTerm) ||
+          (o.user_id && o.user_id.toLowerCase().includes(searchTerm))
+        );
+      }
+
+      renderOrders(filtered);
+    }
+
+    // 加载报名人员列表
+    async function loadPersons() {
+      try {
+        const response = await fetch(`${API_BASE}/admin/persons`);
+        const result = await response.json();
+
+        if (result.success) {
+          // 只显示订单状态为已完成的人员
+          allPersons = result.data.filter(p => p.order_status === 'completed');
+          renderPersons(allPersons);
+          populateServiceFilter();
+        }
+      } catch (error) {
+        console.error('加载人员列表失败:', error);
+        document.getElementById('personsBody').innerHTML = `
+          <tr>
+            <td colspan="11" class="empty-state">
+              <div class="empty-state-icon">⚠️</div>
+              <div class="empty-state-text">加载失败</div>
+            </td>
+          </tr>`;
+      }
+    }
+
+    // 填充服务筛选下拉框
+    function populateServiceFilter() {
+      const serviceFilter = document.getElementById('serviceFilter');
+      const uniqueServices = [...new Set(allPersons.map(p => p.service_name).filter(Boolean))];
+
+      serviceFilter.innerHTML = '<option value="">全部服务</option>' +
+        uniqueServices.map(service => `<option value="${service}">${service}</option>`).join('');
+    }
+
+    // 渲染人员列表
+    function renderPersons(persons) {
+      const tbody = document.getElementById('personsBody');
+
+      if (persons.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="11" class="empty-state">
+              <div class="empty-state-icon">👥</div>
+              <div class="empty-state-text">暂无报名人员</div>
+            </td>
+          </tr>`;
+        return;
+      }
+
+      tbody.innerHTML = persons.map(person => `
+        <tr>
+          <td><strong>${person.name}</strong></td>
+          <td>${person.gender === 'male' ? '男' : '女'}</td>
+          <td>${formatDate(person.birth_date)}</td>
+          <td>${person.shichen_name}</td>
+          <td style="font-family: monospace; font-size: 12px;">${person.bazi_full || '-'}</td>
+          <td>${person.shengxiao || '-'}</td>
+          <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${person.address || '-'}">${person.address || '-'}</td>
+          <td>${person.service_name || '-'}</td>
+          <td style="font-family: monospace; font-size: 12px;">${person.order_no || '-'}</td>
+          <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${person.order_remarks || '-'}">${person.order_remarks || '-'}</td>
+          <td style="font-size: 13px;">${formatDateTime(person.created_at)}</td>
+        </tr>
+      `).join('');
+    }
+
+    // 筛选人员
+    function filterPersons() {
+      const gender = document.getElementById('genderFilter').value;
+      const service = document.getElementById('serviceFilter').value;
+      const searchTerm = document.getElementById('personSearch').value.toLowerCase();
+
+      let filtered = allPersons;
+
+      if (gender) {
+        filtered = filtered.filter(p => p.gender === gender);
+      }
+
+      if (service) {
+        filtered = filtered.filter(p => p.service_name === service);
+      }
+
+      if (searchTerm) {
+        filtered = filtered.filter(p =>
+          p.name.toLowerCase().includes(searchTerm) ||
+          (p.order_no && p.order_no.toLowerCase().includes(searchTerm))
+        );
+      }
+
+      renderPersons(filtered);
+    }
+
+    // 导出人员列表
+    function exportPersons() {
+      if (allPersons.length === 0) {
+        alert('暂无人员数据可导出');
+        return;
+      }
+
+      const headers = ['姓名', '性别', '出生日期', '时辰', '八字', '生肖', '农历', '居住地址', '服务名称', '订单号', '订单备注', '报名时间'];
+      const rows = allPersons.map(person => [
+        person.name,
+        person.gender === 'male' ? '男' : '女',
+        formatDate(person.birth_date),
+        person.shichen_name,
+        person.bazi_full || '',
+        person.shengxiao || '',
+        person.lunar_date || '',
+        person.address || '',
+        person.service_name || '',
+        person.order_no || '',
+        person.order_remarks || '',
+        formatDateTime(person.created_at)
+      ]);
+
+      const csv = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+      downloadCSV(csv, 'persons_' + new Date().toISOString().split('T')[0] + '.csv');
+    }
+
+    // 加载服务列表
+    async function loadServices() {
+      try {
+        const response = await fetch(`${API_BASE}/admin/services`);
+        const result = await response.json();
+
+        if (result.success) {
+          allServices = result.data;
+          renderServices(allServices);
+        }
+      } catch (error) {
+        console.error('加载服务失败:', error);
+        document.getElementById('servicesBody').innerHTML = `
+          <tr>
+            <td colspan="8" class="empty-state">
+              <div class="empty-state-icon">⚠️</div>
+              <div class="empty-state-text">加载失败</div>
+            </td>
+          </tr>`;
+      }
+    }
+
+    // 渲染服务列表
+    function renderServices(services) {
+      const tbody = document.getElementById('servicesBody');
+
+      if (services.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" class="empty-state">
+              <div class="empty-state-icon">⚙️</div>
+              <div class="empty-state-text">暂无服务</div>
+            </td>
+          </tr>`;
+        return;
+      }
+
+      tbody.innerHTML = services.map(service => `
+        <tr>
+          <td>
+            ${service.image_url ?
+              `<img src="${service.image_url}" class="img-thumbnail" alt="${service.name}">` :
+              '<div class="img-placeholder">📦</div>'}
+          </td>
+          <td>
+            <strong>${service.name}</strong>
+            ${service.short_description ? `<br><small style="color: var(--text-secondary);">${service.short_description}</small>` : ''}
+          </td>
+          <td>${service.category_name || '-'}</td>
+          <td><strong style="color: var(--primary-color);">¥${service.base_price}</strong></td>
+          <td><strong style="color: var(--primary-color);">¥${service.price_per_person}</strong></td>
+          <td><span class="badge ${service.status === 'active' ? 'badge-active' : 'badge-inactive'}">${service.status === 'active' ? '已上架' : '已下架'}</span></td>
+          <td>${service.sort_order}</td>
+          <td>
+            <button class="btn btn-primary btn-sm" onclick="editService(${service.id})">✏️ 编辑</button>
+            <button class="btn ${service.status === 'active' ? 'btn-secondary' : 'btn-success'} btn-sm"
+                    onclick="toggleServiceStatus(${service.id}, '${service.status}')">
+              ${service.status === 'active' ? '📥 下架' : '📤 上架'}
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // 加载分类
+    async function loadCategories() {
+      try {
+        const response = await fetch(`${API_BASE}/categories`);
+        const result = await response.json();
+
+        if (result.success) {
+          categories = result.data;
+          const select = document.getElementById('categorySelect');
+          select.innerHTML = '<option value="">选择分类</option>' +
+            categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+        }
+      } catch (error) {
+        console.error('加载分类失败:', error);
+      }
+    }
+
+    // 显示服务模态框
+    function showServiceModal(serviceId = null) {
+      loadCategories();
+      document.getElementById('serviceModalTitle').textContent = serviceId ? '✏️ 编辑服务' : '➕ 新建服务';
+      document.getElementById('serviceForm').reset();
+      document.getElementById('serviceModal').classList.add('active');
+    }
+
+    // 编辑服务
+    async function editService(id) {
+      const service = allServices.find(s => s.id === id);
+      if (!service) return;
+
+      await loadCategories();
+
+      document.getElementById('serviceModalTitle').textContent = '✏️ 编辑服务';
+      const form = document.getElementById('serviceForm');
+
+      let idInput = form.querySelector('input[name="id"]');
+      if (!idInput) {
+        idInput = document.createElement('input');
+        idInput.type = 'hidden';
+        idInput.name = 'id';
+        form.insertBefore(idInput, form.firstChild);
+      }
+      idInput.value = service.id;
+
+      form.elements['name'].value = service.name;
+      form.elements['short_description'].value = service.short_description || '';
+      form.elements['description'].value = service.description || '';
+      form.elements['category_id'].value = service.category_id;
+      form.elements['base_price'].value = service.base_price;
+      form.elements['price_per_person'].value = service.price_per_person;
+      form.elements['image_url'].value = service.image_url || '';
+      form.elements['sort_order'].value = service.sort_order || 0;
+
+      let statusInput = form.querySelector('select[name="status"]');
+      if (!statusInput) {
+        const formGroup = document.createElement('div');
+        formGroup.className = 'form-group';
+        formGroup.innerHTML = `
+          <label>状态</label>
+          <select name="status">
+            <option value="active">上架</option>
+            <option value="inactive">下架</option>
+          </select>
+        `;
+        form.querySelector('.modal-body').appendChild(formGroup);
+        statusInput = form.querySelector('select[name="status"]');
+      }
+      statusInput.value = service.status;
+
+      document.getElementById('serviceModal').classList.add('active');
+    }
+
+    // 保存服务
+    async function saveService(event) {
+      event.preventDefault();
+
+      const formData = new FormData(event.target);
+      const data = Object.fromEntries(formData);
+      const serviceId = data.id;
+
+      try {
+        const url = serviceId ? `${API_BASE}/services/${serviceId}` : `${API_BASE}/services`;
+        const method = serviceId ? 'PUT' : 'POST';
+
+        const response = await fetch(url, {
+          method: method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          alert('✅ 保存成功！');
+          closeModal('serviceModal');
+          loadServices();
+        } else {
+          alert('❌ 保存失败：' + result.message);
+        }
+      } catch (error) {
+        console.error('保存服务失败:', error);
+        alert('❌ 保存失败：' + error.message);
+      }
+    }
+
+    // 切换服务状态
+    async function toggleServiceStatus(serviceId, currentStatus) {
+      const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
+      const action = newStatus === 'active' ? '上架' : '下架';
+
+      if (!confirm(`确定要${action}此服务吗？`)) {
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_BASE}/services/${serviceId}/status`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: newStatus })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          alert(`✅ ${action}成功！`);
+          loadServices();
+        } else {
+          alert(`❌ ${action}失败：` + result.message);
+        }
+      } catch (error) {
+        console.error(`${action}服务失败:`, error);
+        alert(`❌ ${action}失败：` + error.message);
+      }
+    }
+
+    // 加载所有分类
+    async function loadAllCategories() {
+      try {
+        const response = await fetch(`${API_BASE}/admin/categories`);
+        const result = await response.json();
+
+        if (result.success) {
+          renderCategories(result.data);
+        }
+      } catch (error) {
+        console.error('加载分类失败:', error);
+        document.getElementById('categoriesBody').innerHTML = `
+          <tr>
+            <td colspan="6" class="empty-state">
+              <div class="empty-state-icon">⚠️</div>
+              <div class="empty-state-text">加载失败</div>
+            </td>
+          </tr>`;
+      }
+    }
+
+    // 渲染分类列表
+    function renderCategories(categories) {
+      const tbody = document.getElementById('categoriesBody');
+
+      if (categories.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" class="empty-state">
+              <div class="empty-state-icon">📂</div>
+              <div class="empty-state-text">暂无分类</div>
+            </td>
+          </tr>`;
+        return;
+      }
+
+      tbody.innerHTML = categories.map(category => `
+        <tr>
+          <td style="font-size: 28px;">${category.icon || '📦'}</td>
+          <td><strong>${category.name}</strong></td>
+          <td>${category.sort_order}</td>
+          <td><span class="badge ${category.status === 'active' ? 'badge-active' : 'badge-inactive'}">${category.status === 'active' ? '启用' : '禁用'}</span></td>
+          <td style="font-size: 13px;">${category.created_at}</td>
+          <td>
+            <button class="btn btn-primary btn-sm" onclick="editCategory(${category.id}, '${category.name}', '${category.icon || ''}', ${category.sort_order}, '${category.status}')">✏️ 编辑</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // 显示分类模态框
+    function showCategoryModal() {
+      document.getElementById('categoryModalTitle').textContent = '➕ 新建分类';
+      document.getElementById('categoryForm').reset();
+      document.getElementById('categoryModal').classList.add('active');
+    }
+
+    // 编辑分类
+    function editCategory(id, name, icon, sort_order, status) {
+      document.getElementById('categoryModalTitle').textContent = '✏️ 编辑分类';
+      const form = document.getElementById('categoryForm');
+      form.elements['id'].value = id;
+      form.elements['name'].value = name;
+      form.elements['icon'].value = icon;
+      form.elements['sort_order'].value = sort_order;
+      form.elements['status'].value = status;
+      document.getElementById('categoryModal').classList.add('active');
+    }
+
+    // 保存分类
+    async function saveCategory(event) {
+      event.preventDefault();
+
+      const formData = new FormData(event.target);
+      const data = Object.fromEntries(formData);
+      const categoryId = data.id;
+
+      try {
+        const url = categoryId ? `${API_BASE}/categories/${categoryId}` : `${API_BASE}/categories`;
+        const method = categoryId ? 'PUT' : 'POST';
+
+        const response = await fetch(url, {
+          method: method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          alert('✅ 保存成功！');
+          closeModal('categoryModal');
+          loadAllCategories();
+          loadCategories();
+        } else {
+          alert('❌ 保存失败：' + result.message);
+        }
+      } catch (error) {
+        console.error('保存分类失败:', error);
+        alert('❌ 保存失败：' + error.message);
+      }
+    }
+
+    // 关闭模态框
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.remove('active');
+    }
+
+    // 导出订单
+    function exportOrders() {
+      if (allOrders.length === 0) {
+        alert('暂无订单数据可导出');
+        return;
+      }
+
+      const headers = ['订单号', '服务名称', '用户ID', '人数', '金额', '订单状态', '创建时间'];
+      const statusMap = {
+        'pending': '待支付',
+        'paid': '已支付',
+        'processing': '处理中',
+        'completed': '已完成',
+        'cancelled': '已取消'
+      };
+
+      const rows = allOrders.map(order => [
+        order.order_no,
+        order.service_name,
+        order.user_id,
+        order.person_count,
+        order.total_amount,
+        statusMap[order.status] || order.status,
+        formatDateTime(order.created_at)
+      ]);
+
+      const csv = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+      downloadCSV(csv, 'orders_' + new Date().toISOString().split('T')[0] + '.csv');
+    }
+
+    // 下载CSV
+    function downloadCSV(csv, filename) {
+      const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
+      link.click();
+    }
+
+    // 加载统计数据
+    async function loadStats() {
+      try {
+        await loadOrders();
+        const servicesRes = await fetch(`${API_BASE}/services`);
+        const servicesData = await servicesRes.json();
+
+        document.getElementById('totalOrders').textContent = allOrders.length;
+        const completedOrders = allOrders.filter(o => o.status === 'completed');
+        document.getElementById('completedOrders').textContent = completedOrders.length;
+        // 总收入只统计已完成订单
+        document.getElementById('totalRevenue').textContent =
+          '¥' + completedOrders.reduce((sum, o) => sum + parseFloat(o.total_amount), 0).toFixed(2);
+        document.getElementById('totalServices').textContent = servicesData.data.length;
+
+        // 显示最近订单
+        const recent = allOrders.slice(0, 10);
+        const tbody = document.getElementById('recentOrdersBody');
+
+        if (recent.length === 0) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="5" class="empty-state">
+                <div class="empty-state-icon">📦</div>
+                <div class="empty-state-text">暂无订单</div>
+              </td>
+            </tr>`;
+        } else {
+          const statusMap = {
+            'pending': { text: '待支付', class: 'badge-pending' },
+            'paid': { text: '已支付', class: 'badge-paid' },
+            'processing': { text: '处理中', class: 'badge-pending' },
+            'completed': { text: '已完成', class: 'badge-completed' },
+            'cancelled': { text: '已取消', class: 'badge-cancelled' }
+          };
+
+          tbody.innerHTML = recent.map(order => `
+            <tr>
+              <td style="font-family: monospace; font-size: 12px;">${order.order_no}</td>
+              <td><strong>${order.service_name}</strong></td>
+              <td><strong style="color: var(--primary-color);">¥${order.total_amount}</strong></td>
+              <td><span class="badge ${statusMap[order.status]?.class || ''}">${statusMap[order.status]?.text || order.status}</span></td>
+              <td style="font-size: 13px;">${formatDateTime(order.created_at)}</td>
+            </tr>
+          `).join('');
+        }
+      } catch (error) {
+        console.error('加载统计数据失败:', error);
+      }
+    }
+
+    // 页面加载时初始化
+    window.onload = function() {
+      restoreSidebarState();  // 恢复侧边栏状态
+      loadStats();
+      loadCategories();
+
+      // 添加搜索框事件监听
+      document.getElementById('personSearch')?.addEventListener('input', filterPersons);
+      document.getElementById('orderSearch')?.addEventListener('input', filterOrders);
+    };
+
+    // 点击模态框外部关闭
+    window.onclick = function(event) {
+      if (event.target.classList.contains('modal')) {
+        event.target.classList.remove('active');
+      }
+    };
+  </script>
+</body>
+</html>

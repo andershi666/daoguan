@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>数据测试</title>
+</head>
+<body>
+  <h1>报名人员数据测试</h1>
+  <div id="result"></div>
+
+  <script>
+    fetch('http://localhost:3000/api/admin/persons')
+      .then(res => res.json())
+      .then(data => {
+        const result = document.getElementById('result');
+        result.innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+      })
+      .catch(err => {
+        document.getElementById('result').innerHTML = '错误: ' + err.message;
+      });
+  </script>
+</body>
+</html>

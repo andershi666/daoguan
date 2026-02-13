@@ -1,0 +1,33 @@
+# 缺失图片: default-service.png
+
+## 问题
+此文件应该是 `default-service.png`,但目前不存在。
+
+## 如何创建
+
+### 选项1: 手动创建 (推荐)
+1. 创建一张 750x500px 的图片
+2. 可以使用任何道观相关的图片
+3. 保存为 `default-service.png`
+4. 放在此目录下
+
+### 选项2: 使用在线工具
+访问: https://via.placeholder.com/750x500/e5e5e5/999999.png?text=雨溪道观
+
+下载后重命名为 `default-service.png`
+
+### 选项3: 临时方案
+复制 `tabbar/service-normal.png` 并重命名为 `default-service.png`
+
+## 图片规格
+- 格式: PNG 或 JPG
+- 尺寸: 750x500px (宽高比 3:2)
+- 文件大小: < 200KB
+- 内容建议: 道观建筑、太极图案、或纯色背景
+
+## 相关代码位置
+此图片被以下页面引用:
+- pages/index/index.wxml (服务列表)
+- pages/service-detail/service-detail.wxml (服务详情)
+- pages/order-detail/order-detail.wxml (订单详情)
+- pages/order-list/order-list.wxml (订单列表)

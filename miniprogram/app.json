@@ -1,0 +1,50 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/service-detail/service-detail",
+    "pages/order-create/order-create",
+    "pages/order-confirm/order-confirm",
+    "pages/order-list/order-list",
+    "pages/order-detail/order-detail",
+    "pages/contact/contact"
+  ],
+  "window": {
+    "backgroundTextStyle": "dark",
+    "navigationBarBackgroundColor": "#FF9500",
+    "navigationBarTitleText": "道观服务预约",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#FFF9F0",
+    "enablePullDownRefresh": false,
+    "onReachBottomDistance": 50
+  },
+
+  "tabBar": {
+    "color": "#AFAFAF",
+    "selectedColor": "#FF9500",
+    "backgroundColor": "#FFFFFF",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "服务",
+        "iconPath": "images/tabbar/service-normal.png",
+        "selectedIconPath": "images/tabbar/service-active.png"
+      },
+      {
+        "pagePath": "pages/order-list/order-list",
+        "text": "订单",
+        "iconPath": "images/tabbar/order-normal.png",
+        "selectedIconPath": "images/tabbar/order-active.png"
+      },
+      {
+        "pagePath": "pages/contact/contact",
+        "text": "客服",
+        "iconPath": "images/tabbar/contact-normal.png",
+        "selectedIconPath": "images/tabbar/contact-active.png"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

@@ -1,0 +1,98 @@
+<!--pages/order-detail/order-detail.wxml-->
+<view class="container" wx:if="{{!loading && order}}">
+  <!-- 订单状态 -->
+  <view class="status-card">
+    <text class="status-text">{{statusMap[order.status]}}</text>
+    <text class="order-no">订单号: {{order.order_no}}</text>
+    <text class="order-time">下单时间: {{order.created_at}}</text>
+  </view>
+
+  <!-- 服务信息 -->
+  <view class="card">
+    <view class="section-title">服务信息</view>
+    <view class="service-row">
+      <image class="service-image" src="{{order.service_image || '/images/default-service.png'}}" mode="aspectFill"></image>
+      <view class="service-info">
+        <text class="service-name">{{order.service_name}}</text>
+        <text class="service-desc">{{order.service_description}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 人员信息 -->
+  <view class="card">
+    <view class="section-title">人员信息（共{{order.person_count}}人）</view>
+    <block wx:for="{{order.persons}}" wx:key="id" wx:for-index="index">
+      <view class="person-item">
+        <view class="person-header">
+          <text class="person-number">第{{index + 1}}位</text>
+        </view>
+        <view class="info-row">
+          <text class="info-label">姓名：</text>
+          <text class="info-value">{{item.name}}</text>
+        </view>
+        <view class="info-row">
+          <text class="info-label">性别：</text>
+          <text class="info-value">{{item.gender === 'male' ? '男' : '女'}}</text>
+        </view>
+        <view class="info-row">
+          <text class="info-label">出生日期：</text>
+          <text class="info-value">{{item.birth_date}}</text>
+        </view>
+        <view class="info-row">
+          <text class="info-label">出生时辰：</text>
+          <text class="info-value">{{item.shichen_name}}</text>
+        </view>
+        <view class="info-row">
+          <text class="info-label">生肖：</text>
+          <text class="info-value">{{item.shengxiao}}</text>
+        </view>
+        <view class="info-row">
+          <text class="info-label">农历：</text>
+          <text class="info-value">{{item.lunar_date}}</text>
+        </view>
+        <view class="info-row bazi-row">
+          <text class="info-label">八字：</text>
+          <text class="info-value bazi-text">{{item.bazi_full}}</text>
+        </view>
+        <view class="info-row" wx:if="{{item.address}}">
+          <text class="info-label">居住地址：</text>
+          <text class="info-value">{{item.address}}</text>
+        </view>
+      </view>
+    </block>
+  </view>
+
+  <!-- 其他信息 -->
+  <view class="card" wx:if="{{order.remark}}">
+    <view class="section-title">其他信息</view>
+    <view class="info-row" wx:if="{{order.remark}}">
+      <text class="info-label">备注说明：</text>
+      <text class="info-value">{{order.remark}}</text>
+    </view>
+  </view>
+
+  <!-- 费用明细 -->
+  <view class="card">
+    <view class="section-title">费用明细</view>
+    <view class="price-row">
+      <text class="price-label">订单金额</text>
+      <text class="price-value">¥{{order.total_amount}}</text>
+    </view>
+    <view class="price-row total-row">
+      <text class="price-label">实付金额</text>
+      <text class="price-value total-price">¥{{order.total_amount}}</text>
+    </view>
+  </view>
+
+  <!-- 底部操作栏 -->
+  <view class="bottom-bar" wx:if="{{order.payment_status === 'unpaid' && order.status === 'pending'}}">
+    <button class="cancel-btn" bindtap="cancelOrder">取消订单</button>
+    <button class="pay-btn" bindtap="payOrder">立即支付</button>
+  </view>
+</view>
+
+<!-- 加载中 -->
+<view wx:if="{{loading}}" class="loading-state">
+  <text>加载中...</text>
+</view>

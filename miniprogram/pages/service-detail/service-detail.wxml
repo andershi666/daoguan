@@ -1,0 +1,47 @@
+<!--pages/service-detail/service-detail.wxml-->
+<view class="container" wx:if="{{!loading && service}}">
+  <!-- 服务图片 -->
+  <image class="service-banner" src="{{service.image_url || '/images/default-service.png'}}" mode="aspectFill"></image>
+
+  <!-- 服务详情 -->
+  <view class="card service-detail">
+    <text class="service-name">{{service.name}}</text>
+    <view class="price-section">
+      <view class="price-item">
+        <text class="price-label">基础价格</text>
+        <text class="price-value">¥{{service.base_price}}</text>
+      </view>
+      <view class="price-item">
+        <text class="price-label">每人加价</text>
+        <text class="price-value">¥{{service.price_per_person}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 服务说明 -->
+  <view class="card">
+    <view class="section-title">服务说明</view>
+    <text class="service-description">{{service.description}}</text>
+  </view>
+
+  <!-- 温馨提示 -->
+  <view class="card">
+    <view class="section-title">温馨提示</view>
+    <view class="tips">
+      <text class="tip-item">• 请如实填写人员信息，确保八字计算准确</text>
+      <text class="tip-item">• 出生时辰按照传统十二时辰（子丑寅卯等）选择</text>
+      <text class="tip-item">• 订单提交后，我们会尽快为您安排法事</text>
+      <text class="tip-item">• 如有特殊需求，请在备注中说明</text>
+    </view>
+  </view>
+
+  <!-- 底部预约按钮 -->
+  <view class="bottom-bar">
+    <button class="book-btn" bindtap="goToOrderCreate">立即预约</button>
+  </view>
+</view>
+
+<!-- 加载中 -->
+<view wx:if="{{loading}}" class="loading-state">
+  <text>加载中...</text>
+</view>
