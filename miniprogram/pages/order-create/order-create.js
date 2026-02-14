@@ -19,7 +19,9 @@ Page({
     remark: '',
     totalAmount: 0,
     currentEditPersonIndex: null,
-    showShichenPicker: false
+    showShichenPicker: false,
+    selectedShichenIndex: [12], // 默认选中吉时（索引12）
+    tempSelectedShichen: null
   },
 
   onLoad(options) {
@@ -159,26 +161,70 @@ Page({
   // 显示时辰选择器
   showShichenPickerHandler(e) {
     const index = e.currentTarget.dataset.index;
+    const currentShichen = this.data.persons[index];
+
+    // 找到当前选中的时辰索引
+    let currentIndex = 12; // 默认吉时
+    if (currentShichen.shichen_value !== 99) {
+      currentIndex = this.data.shichenList.findIndex(s => s.value === currentShichen.shichen_value);
+    }
+
     this.setData({
       currentEditPersonIndex: index,
-      showShichenPicker: true
+      showShichenPicker: true,
+      selectedShichenIndex: [currentIndex],
+      tempSelectedShichen: null
     });
   },
 
-  // 选择时辰
+  // 时辰选择变化（暂存）
   onShichenChange(e) {
-    const shichenIndex = e.detail.value;
+    // picker-view 的 detail.value 是一个数组
+    const shichenIndex = e.detail.value[0]; // 获取第一个列的选中索引
     const selectedShichen = this.data.shichenList[shichenIndex];
-    const persons = this.data.persons;
-    const index = this.data.currentEditPersonIndex;
-
-    persons[index].shichen_value = selectedShichen.value;
-    persons[index].shichen_name = selectedShichen.name;
 
     this.setData({
-      persons,
+      selectedShichenIndex: [shichenIndex],
+      tempSelectedShichen: selectedShichen
+    });
+
+    console.log('选择时辰:', selectedShichen.displayName, '(索引:', shichenIndex, ')');
+  },
+
+  // 隐藏时辰选择器
+  hideShichenPicker() {
+    this.setData({
       showShichenPicker: false
     });
+  },
+
+  // 阻止事件冒泡
+  stopPropagation() {
+    // 阻止点击选择器内容时关闭弹窗
+  },
+
+  // 确认选择时辰
+  confirmShichen() {
+    if (this.data.tempSelectedShichen) {
+      const selectedShichen = this.data.tempSelectedShichen;
+      const persons = this.data.persons;
+      const index = this.data.currentEditPersonIndex;
+
+      persons[index].shichen_value = selectedShichen.value;
+      persons[index].shichen_name = selectedShichen.name;
+
+      this.setData({
+        persons,
+        showShichenPicker: false
+      });
+
+      console.log('✅ 确认选择时辰:', selectedShichen.name);
+    } else {
+      // 如果没有选择,直接关闭
+      this.setData({
+        showShichenPicker: false
+      });
+    }
   },
 
   // 输入地址

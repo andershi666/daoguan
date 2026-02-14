@@ -89,18 +89,27 @@
     </block>
   </view>
 
-  <!-- 时辰选择器 -->
-  <picker-view
-    wx:if="{{showShichenPicker}}"
-    class="shichen-picker"
-    bindchange="onShichenChange"
-  >
-    <picker-view-column>
-      <view wx:for="{{shichenList}}" wx:key="value" class="picker-item">
-        {{item.name}}
+  <!-- 时辰选择器弹窗 -->
+  <view wx:if="{{showShichenPicker}}" class="picker-modal" catchtap="hideShichenPicker">
+    <view class="picker-content" catchtap="stopPropagation">
+      <view class="picker-header">
+        <text class="picker-cancel" bindtap="hideShichenPicker">取消</text>
+        <text class="picker-title">选择时辰</text>
+        <text class="picker-confirm" bindtap="confirmShichen">确定</text>
       </view>
-    </picker-view-column>
-  </picker-view>
+      <picker-view
+        class="shichen-picker"
+        bindchange="onShichenChange"
+        value="{{selectedShichenIndex}}"
+      >
+        <picker-view-column>
+          <view wx:for="{{shichenList}}" wx:key="value" class="picker-item">
+            {{item.displayName}}
+          </view>
+        </picker-view-column>
+      </picker-view>
+    </view>
+  </view>
 
   <!-- 其他信息 -->
   <view class="card">

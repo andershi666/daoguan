@@ -291,29 +291,81 @@
 }
 
 /* 时辰选择器 */
-.shichen-picker {
+.picker-modal {
   position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 9999;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.picker-content {
+  position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  height: 560rpx;
-  background: linear-gradient(to top, #ffffff 0%, #fefefe 100%);
-  z-index: 9999;
+  background: #ffffff;
   border-radius: 40rpx 40rpx 0 0;
   box-shadow: 0 -16rpx 48rpx rgba(0, 0, 0, 0.15),
               0 -4rpx 16rpx rgba(0, 0, 0, 0.08);
   animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 @keyframes slideUp {
   from {
     transform: translateY(100%);
-    opacity: 0;
   }
   to {
     transform: translateY(0);
-    opacity: 1;
   }
+}
+
+.picker-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 28rpx 32rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+  background: #fafafa;
+}
+
+.picker-cancel,
+.picker-confirm {
+  font-size: 32rpx;
+  font-weight: 500;
+  padding: 12rpx 24rpx;
+  border-radius: 8rpx;
+}
+
+.picker-cancel {
+  color: #999;
+}
+
+.picker-confirm {
+  color: #D2691E;
+}
+
+.picker-title {
+  font-size: 34rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.shichen-picker {
+  height: 520rpx;
 }
 
 .picker-item {
@@ -321,13 +373,9 @@
   align-items: center;
   justify-content: center;
   height: 88rpx;
-  font-size: 30rpx;
-  color: var(--color-text-primary);
-  transition: all 0.3s ease;
-}
-
-.picker-item:active {
-  background: var(--color-bg-accent);
+  font-size: 32rpx;
+  color: #333;
+  font-weight: 500;
 }
 
 /* 底部订单栏 */
