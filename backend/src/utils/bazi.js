@@ -97,12 +97,10 @@ function calculateBazi(birthDate, shichenValue, gender) {
     }
 
     // 正常时辰处理：根据时辰值确定具体时刻
-    // 特别注意: 子时(23:00-01:00)跨日,传统命理学使用23:00(早子时)
-    // 但是如果用户选择某一天的子时,应该使用该天的晚子时(00:00)而不是前一天的早子时(23:00)
-    // 例如: 2026-12-23 子时,应按 2026-12-23 00:00 计算,而不是 2026-12-22 23:00
+    // 特别注意: 子时(23:00-01:00)跨日,应按第二天00:00计算
+    // 例如: 2026-12-23 子时,应按 2026-12-24 00:00 计算
     const SHICHEN_HOUR_MAP = {
-      0: 0,   // 子时: 00:00 (晚子时, 23:00-01:00的前半段,用于当天计算)
-                  // 注意: 如果需要使用早子时(23:00),日期需要减一天
+      0: 0,   // 子时: 00:00 (第二天的凌晨, 23:00-01:00的后半段)
       1: 1,   // 丑时: 01:00 (01:00-03:00)
       2: 3,   // 寅时: 03:00 (03:00-05:00)
       3: 5,   // 卯时: 05:00 (05:00-07:00)
@@ -122,7 +120,21 @@ function calculateBazi(birthDate, shichenValue, gender) {
     }
 
     // 创建公历日期对象
-    const solar = Solar.fromYmdHms(year, month, day, shichenHour, 0, 0);
+    // 子时特殊处理: 如果是子时,需要将日期加一天
+    let calcYear = year;
+    let calcMonth = month;
+    let calcDay = day;
+
+    if (shichenValue === 0) {
+      // 子时: 日期加一天,使用第二天的00:00
+      const date = new Date(year, month - 1, day);
+      date.setDate(date.getDate() + 1);
+      calcYear = date.getFullYear();
+      calcMonth = date.getMonth() + 1; // JavaScript月份从0开始
+      calcDay = date.getDate();
+    }
+
+    const solar = Solar.fromYmdHms(calcYear, calcMonth, calcDay, shichenHour, 0, 0);
 
     // 转换为农历
     const lunar = solar.getLunar();
